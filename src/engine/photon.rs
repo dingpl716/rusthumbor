@@ -1,4 +1,4 @@
-use std::io::BufWriter;
+use std::io::{BufWriter, Cursor};
 
 use super::{Engine, SpecTransform};
 use crate::pb::*;
@@ -114,12 +114,13 @@ fn image_to_buf(img: PhotonImage, format: ImageOutputFormat) -> Vec<u8> {
     let raw_pixels: Vec<u8> = img.get_raw_pixels();
     let width = img.get_width();
     let height = img.get_height();
+
     let img_buffer = ImageBuffer::from_vec(width, height, raw_pixels).unwrap();
     let dynamic_image: DynamicImage = DynamicImage::ImageRgba8(img_buffer);
-    let mut buffer: Vec<u8> = Vec::with_capacity(32768);
-    let mut buffer_writer = BufWriter::new(buffer);
-    dynamic_image.write_to(&mut buffer_writer, format).unwrap();
-    dynamic_image.write_to(&mut buffer_writer, format);
 
-    buffer
+    let buffer: Vec<u8> = Vec::with_capacity(32768);
+    let cursor: Cursor<Vec<u8>> = Cursor::new(buffer);
+    let mut buffer_writer: BufWriter<Cursor<Vec<u8>>> = BufWriter::new(cursor);
+    dynamic_image.write_to(&mut buffer_writer, format).unwrap();
+    buffer_writer.into_inner().unwrap().into_inner()
 }

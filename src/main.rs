@@ -80,11 +80,11 @@ async fn generate(
     engine.apply(&spec.specs);
 
     let image = engine.generate(ImageOutputFormat::Jpeg(85));
+
     info!("Finished processing : image size {}", image.len());
-
     let mut headers = HeaderMap::new();
-    headers.insert("content-type", HeaderValue::from_static("image/jpeg"));
 
+    headers.insert("content-type", HeaderValue::from_static("image/jpeg"));
     Ok((headers, image))
 }
 
